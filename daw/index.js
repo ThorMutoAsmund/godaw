@@ -10,7 +10,10 @@ export * from './sample';
 export * from './functionGenerator';
 export * from './part';
 
-export * from './interfaces/audio-interface.js';
+export * from './interfaces/part-object-interface.js';
+export * from './interfaces/generator-interface.js';
+export * from './interfaces/effect-interface.js';
+export * from './interfaces/cc-interface.js';
 
 export * from './helpers/log';
 export * from './helpers/reflection';

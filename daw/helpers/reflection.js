@@ -3,8 +3,6 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { IAudio } from '../';
-
 export class Reflection {
   static implements(object, intf) {
     if (!object) {

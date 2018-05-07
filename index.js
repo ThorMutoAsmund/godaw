@@ -1,26 +1,41 @@
 
 const fs = require('fs');
 
-import { Song, Track, Sample, FunctionGenerator, IAudio } from './daw';
+import { Log, Song, Track, Sample, FunctionGenerator } from './daw';
 
 // Create song
 Song.create("Demo song 01");
 
+// process.exit();
+
+
 // Create track
-var t = Track.create();
+var t = Track.create({
+  isOutput: true
+});
 
 const samplesDir = 'samples';
 var pos = 0.0;
+var promises = [];
 fs.readdirSync('samples').slice(0,1).forEach(fileName => {
-  t.add(pos, Sample.fromFile(`${samplesDir}/${fileName}` 
-  ));
-  pos += 1.0;
+  promises.push(Sample.fromFile(`${samplesDir}/${fileName}`).then(sample => {
+    t.add(sample, pos);
+    pos += 1.0;
+  }))
 })
 
 // Add sine after one second
-t.add(pos, FunctionGenerator.create({
-  func: (t) => sin(t)*1000 
-}));
+t.add(FunctionGenerator.create({
+  func: (t) => sin(t)*1000  
+}), pos);
+
+Promise.all(promises).then(() => {
+  // Render song
+  const output = Song.default.render(0, 1000);
+  console.log('output', output);
+}).catch(err => {
+  Log.err(err);
+})
 
 
 

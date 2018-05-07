@@ -4,16 +4,20 @@
 //
 
 export class Log {
-  static debug(caller, message) {
-    console.log(`[${caller.name}] ${message}`);
+  static generic(type, message, caller) {
+    console.log(`${type ? `${type}: ` : ''}${caller ? `[${caller.name}] ` : ''}${message}`);
   }
 
-  static warn(caller, message) {
-    console.log(`WARNING: [${caller.name}] ${message}`);
+  static debug(message, caller) {
+    Log.generic(null, message, caller);
   }
 
-  static err(caller, message) {
-    console.log(`ERROR: [${caller.name}] ${message}`);
+  static warn(message, caller) {
+    Log.generic('WARNING', message, caller);
+  }
+
+  static err(message, caller) {
+    Log.generic('ERROR', message, caller);
   }
 }
 
