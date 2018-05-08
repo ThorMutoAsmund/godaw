@@ -3,6 +3,8 @@ const fs = require('fs');
 
 import { Log, Song, Track, Sample, FunctionGenerator } from './daw';
 
+var t3 = new Track();
+
 // Create song
 Song.create("Demo song 01");
 
@@ -11,33 +13,56 @@ Song.create("Demo song 01");
 
 // Create track
 var t = Track.create({
-  isOutput: true
 });
 
-const samplesDir = 'samples';
-var pos = 0.0;
-var promises = [];
-fs.readdirSync('samples').slice(0,1).forEach(fileName => {
-  promises.push(Sample.fromFile(`${samplesDir}/${fileName}`).then(sample => {
-    t.add(sample, pos);
-    pos += 1.0;
-  }))
+var t2 = Track.create({
+});
+
+Song.default.addTrack(t3);
+
+var s1 = Sample.create({
+  length:10
 })
+s1.set(0, 0, 1.0);
+s1.set(0, 1, 1.1);
 
-// Add sine after one second
-t.add(FunctionGenerator.create({
-  func: (t) => sin(t)*1000  
-}), pos);
+var p1 = t.addPart(s1, 0);
+var p2 = t.addPart(s1, 2);
 
-Promise.all(promises).then(() => {
-  // Render song
-  const output = Song.default.render(0, 1000);
-  console.log('output', output);
-}).catch(err => {
-  Log.err(err);
+var s2 = Sample.create({
+  length:10
 })
+s2.set(0, 2, 1.2);
+s2.set(0, 3, 1.3);
+
+var p3 = t.addPart(s2, 4);
 
 
+
+// const samplesDir = 'samples';
+// var pos = 0.0;
+// var promises = [];
+// fs.readdirSync('samples').slice(0,1).forEach(fileName => {
+//   promises.push(Sample.fromFile(`${samplesDir}/${fileName}`).then(sample => {
+//     t.add(sample, pos);
+//     pos += 1.0;
+//   }))
+// })
+
+// // Add sine after one second
+// t.add(FunctionGenerator.create({
+//   func: (t) => sin(t)*1000  
+// }), pos);
+
+// Promise.all(promises).then(() => {
+//   // Render song
+//   const output = Song.default.render(0, 1000);
+//   console.log('output', output);
+// }).catch(err => {
+//   Log.err(err);
+// })
+
+Song.default.render(0,200);
 
 
 

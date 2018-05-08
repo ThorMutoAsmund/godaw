@@ -3,15 +3,10 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Facade, FacadeDefinition, OutputDefinition, Song } from './';
-
 import { default as load } from 'audio-loader';
 
 export class Sample {
   constructor(options = {}) {
-    this.uid = Song.getUID();
-    this.owners = [];
-    
     this.numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
       throw 'Invalid number of channels';
@@ -35,15 +30,6 @@ export class Sample {
       }
       this.clear();
     }
-
-    const facadeDefinition = new FacadeDefinition({
-      outputs: [
-        new OutputDefinition({
-          numberOfChannels: this.numberOfChannels
-        })
-      ]
-    });
-    this.facade = new Facade(this, facadeDefinition);    
   }
 
   static create(options) {
@@ -56,10 +42,10 @@ export class Sample {
     return load(fileName).then(data => {
         const sample = new Sample({
           numberOfChannels: data.numberOfChannels,
-          sampleRate: data.sampleRate,
-          length: data.length,
-          buffers: data._channelData
-        });
+            sampleRate: data.sampleRate,
+            length: data.length,
+            buffers: data._channelData
+        })
 
         return sample;
     })
@@ -69,11 +55,19 @@ export class Sample {
     this.buffers.forEach(buffer => buffer.fill(0));
   }
 
-  prepare(start, length) {
-    const song = Song.getSong(this);
-    this.rateMultiplier = (0.0 + this.sampleRate) / song.sampleRate;
+  setTrack(track) {
+    this.track = track;
+  }
 
-    console.log(song.sampleRate);
+  getNumberOfChannels() {
+    return this.numberOfChannels;
+  }
+
+  prepare(start, length) {
+    if (!this.track) {
+      throw 'No track set for this audio';
+    }
+    this.rateMultiplier = (0.0 + this.sampleRate) / this.track.song.sampleRate;
   }
 
   render(buffers, start, chunkSize) {
@@ -93,6 +87,10 @@ export class Sample {
 
   get duration() {
     return this.length / this.sampleRate;
+  }
+
+  getNumberOfChannels() {
+    return this.numberOfChannels;
   }
 
   set(channel, index, value) {
