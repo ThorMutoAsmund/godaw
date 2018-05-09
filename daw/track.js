@@ -116,6 +116,9 @@ export class Track {
   }
 
   render(start, chunkSize) {
+    this.facade.inputs.forEach(input => {
+        
+    })
     this.generatorList.forEach(part => {
       part.render(this.buffers, this.numberOfChannels, start, chunkSize);
     })
