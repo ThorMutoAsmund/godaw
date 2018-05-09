@@ -8,6 +8,7 @@ export * from './track';
 export * from './facade';
 export * from './sample';
 export * from './part';
+export * from './dummy';
 
 // export * from './mixer';
 

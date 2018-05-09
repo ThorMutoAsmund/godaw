@@ -3,19 +3,24 @@
 // (c) Thor Muto Asmund, 2018
 //
 
+import { Song, Facade, FacadeDefinition, OutputDefinition } from './';
 import { default as load } from 'audio-loader';
 
 export class Sample {
   constructor(options = {}) {
-    this.numberOfChannels = options.numberOfChannels | 2;
+    this.uid = Song.getUID();
+    this.owners = [];
+
+    this.numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
       throw 'Invalid number of channels';
     }
-    this.size = options.size | 0;
+    this.size = options.size || 0;
     if (this.size < 0) {
-      throw 'Invalid track size';
+      throw 'Invalid sample size';
     }
-    this.sampleRate = options.sampleRate | 44100;
+    const song = Song.getSong(this);
+    this.sampleRate = options.sampleRate || song.sampleRate;
     if (this.sampleRate < 0) {
       throw 'Invalid sample rate';
     }
@@ -27,13 +32,18 @@ export class Sample {
           })
         ]
       });
-      this.facade = new Facade(this, facadeDefinition);
+    this.facade = new Facade(this, facadeDefinition);
   
-    this.buffers = new Array(this.channels);
-    for (var c = 0; c < this.channels; ++c) {
-      this.buffers[c] = new Float32Array(this.size);    
+    if (options.buffers) {
+      this.buffers = options.buffers;
     }
-    this.clear();
+    else {
+      this.buffers = new Array(this.numberOfChannels);
+      for (var c = 0; c < this.numberOfChannels; ++c) {
+        this.buffers[c] = new Float32Array(this.size);    
+      }
+      this.clear();
+    }
   }
 
   static create(options) {
@@ -63,31 +73,34 @@ export class Sample {
     return this.length / this.sampleRate;
   }
 
-
   set(channel, index, value) {
     if (index < 0 || index >= this.size) {
       throw 'Index out of bounds';
     }
-    if (channel < 0 || channel >= this.channels) {
+    if (channel < 0 || channel >= this.numberOfChannels) {
       throw 'Channel out of bounds';
     }
     this.buffers[channel][index] = value;
   }
-
-  get(channel, index) {
-    if (index < 0 || index >= this.size) {
-      throw 'Index out of bounds';
-    }
-    if (channel < 0 || channel >= this.channels) {
-      throw 'Channel out of bounds';
-    }
-    return this.buffers[channel][index];    
-  }
   
   prepare(start, length) {
+    const song = Song.getSong(this);
+    this.rateMultiplier = (0.0 + this.sampleRate) / song.sampleRate;
+    console.log(this.rateMultiplier);
+
+    if (this.numberOfChannels == 1) {
+      this.facade.setOutput(t => {
+        return [this.buffers[0][t]];
+      });
+    }
+    else {
+      this.facade.setOutput(t => {
+        return [this.buffers[0][t], this.buffers[0][t]];
+      });
+    }
   }
   
-  render(trackBuffers, trackNumberOfChannels, start, chunkSize) {
-    // This has no inputs so this is a nop
+  render(start, chunkSize) {
+    // Nop
   }
 }

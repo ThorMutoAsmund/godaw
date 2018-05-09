@@ -57,7 +57,7 @@ export class Part {
     // this.object.prepare(start, length);
   }
 
-  render(trackBuffers, trackNumberOfChannels, start, chunkSize) {
+  render(start, chunkSize) {
     // if (start >= (this.position + this.length) || (start + chunkSize) <= this.position) {
     //   return;
     // }

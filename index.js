@@ -6,7 +6,7 @@ import { Log, Song, Track, Sample, FunctionGenerator } from './daw';
 var t3 = new Track();
 
 // Create song
-Song.create("Demo song 01");
+Song.create({name: "Demo song 01"});
 
 // process.exit();
 
@@ -21,7 +21,7 @@ var t2 = Track.create({
 Song.default.addTrack(t3);
 
 var s1 = Sample.create({
-  length:10
+  size: 10
 })
 s1.set(0, 0, 1.0);
 s1.set(0, 1, 1.1);
@@ -30,7 +30,7 @@ var p1 = t.addPart(s1, 0);
 var p2 = t.addPart(s1, 2);
 
 var s2 = Sample.create({
-  length:10
+  size: 10
 })
 s2.set(0, 2, 1.2);
 s2.set(0, 3, 1.3);
