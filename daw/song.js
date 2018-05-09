@@ -73,7 +73,7 @@ export class Song {
       orderedList.forEach(input => {
         input.render(t + start, Math.min(this.chunkSize, length - t));
       })
-      console.log(t + start, Math.min(actualChunkSize, length - t));
+    //   console.log(t + start, Math.min(actualChunkSize, length - t));
 
       t += actualChunkSize;
     }
