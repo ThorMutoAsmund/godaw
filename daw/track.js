@@ -10,20 +10,21 @@ import { Facade, FacadeDefinition, OutputDefinition, Song, Part } from './';
 export class Track {
   constructor(options = {}) {
     this.uid = Song.getUID();
-    this.owners = [];
+    this.song = Song.default;
 
     this.numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
         throw 'Invalid number of channels';
     }
 
-    if (options.isMain === undefined && Song.default) {
-      this.isMain = !Song.default.facade.inputs.some(input => input.isMain);
+    if (options.isMain === undefined) {
+      this.isMain = !this.song.facade.inputs.some(input => input.isMain);
     }
     else {
       this.isMain = options.isMain || false;
     }
 
+    // Set up facade
     const facadeDefinition = new FacadeDefinition({
       hasMultipleInputs: true,
       outputs: [
@@ -32,20 +33,15 @@ export class Track {
         })
       ]
     });
-    this.facade = new Facade(this, facadeDefinition);
-    
-    if (options.song) {
-      options.song.facade.addInput(this);
-    }
-    else {
-      if (Song.default) {
-        Song.default.facade.addInput(this);
-      }
-    }
+    this.facade = new Facade(facadeDefinition);
   }
 
   static create(options) {
     const track = new Track(options);
+
+    // Auto add track to song
+    track.song.facade.addInput(track);
+
     return track;
   }
 
@@ -99,6 +95,50 @@ export class Track {
   // }
 
   prepare(start, length) {
+    if (this.numberOfChannels == 1) {
+      this.facade.setOutput(t => {
+        var v = this.facade.inputs.reduce(input => {
+          (result, input) => 
+            result + 
+            input.facade.output(t).reduce(
+              (accumulator, currentValue) => accumulator + currentValue,
+              0.0
+            )
+          ,
+          0.0
+        });
+        return [v];
+      });
+    }
+    else {
+      this.facade.setOutput(t => {
+        var v = this.facade.inputs.reduce(
+          (result, input) => 
+            {
+              var w = [0.0, 0.0];
+              const o = input.facade.output(t);
+              if (o.length == 1) {
+                w[0] += o[0];
+                w[1] += o[0];
+              }
+              else {
+                w[0] += o[0];
+                w[1] += o[1];
+              }
+
+              return [result[0] + w[0], result[1] + w[1]];
+            }           
+          ,
+          [0.0, 0.0]
+        );
+        return v;
+      });
+    }
+  }
+
+  render(start, chunkSize) {
+  }
+
     // const song = Song.getSong(this);
   
     // this.facade.inputs.forEach(input => {
@@ -113,14 +153,4 @@ export class Track {
     // this.generatorList.forEach(part => {
     //   part.prepare(start, length);
     // })
-  }
-
-  render(start, chunkSize) {
-    this.facade.inputs.forEach(input => {
-        
-    })
-    // this.generatorList.forEach(part => {
-    //   part.render(this.buffers, this.numberOfChannels, start, chunkSize);
-    // })
-  }
 }

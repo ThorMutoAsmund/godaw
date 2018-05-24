@@ -1,43 +1,31 @@
 
 const fs = require('fs');
 
-import { Log, Song, Track, Sample, FunctionGenerator } from './daw';
-
-var t3 = new Track();
+import * as Daw from './daw';
+import { Song, Track, Sample } from './daw/builders';
 
 // Create song
-Song.create({name: "Demo song 01"});
+Song({name: "Demo song 01"});
 
 // process.exit();
 
 
 // Create track
-var t = Track.create({
-});
+var t = Track();
 
-var t2 = Track.create({
-});
-
-Song.default.addTrack(t3);
-
-var s1 = Sample.create({
-  size: 10
+var s1 = Sample({
+  length: 10
 })
+
 s1.set(0, 0, 1.0);
 s1.set(0, 1, 1.1);
+s1.set(0, 2, 1.2);
+s1.set(1, 0, -1.0);
+s1.set(1, 1, -1.1);
+s1.set(1, 2, -1.2);
 
 var p1 = t.addPart(s1, 0);
 var p2 = t.addPart(s1, 2);
-
-var s2 = Sample.create({
-  size: 10
-})
-s2.set(0, 2, 1.2);
-s2.set(0, 3, 1.3);
-
-var p3 = t.addPart(s2, 4);
-
-
 
 // const samplesDir = 'samples';
 // var pos = 0.0;
@@ -62,22 +50,4 @@ var p3 = t.addPart(s2, 4);
 //   Log.err(err);
 // })
 
-Song.default.render(0,200);
-
-
-
-
-// var bufSize = 1000000;
-
-// console.time('Alloc');
-// var buf = new Float32Array(bufSize);
-// console.timeEnd('Alloc');
-// console.log(`Buffer length: ${buf.length}`)
-
-// console.time('Fill');
-// for (var x=0; x < buf.length; ++x) {
-//   buf[x] = x;
-// }
-// console.timeEnd('Fill');
-
-// console.log(buf[10]);
+Daw.Song.default.render(0,10);

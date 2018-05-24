@@ -8,8 +8,9 @@ import { Song, Facade, FacadeDefinition, OutputDefinition } from './';
 export class Dummy {
   constructor() {
     this.uid = Song.getUID();
-    this.owners = [];
+    this.song = Song.default;
 
+    // Set up facade
     const facadeDefinition = new FacadeDefinition({
       outputs: [
         new OutputDefinition({
@@ -17,7 +18,7 @@ export class Dummy {
         })
       ]
     });
-    this.facade = new Facade(this, facadeDefinition);
+    this.facade = new Facade(facadeDefinition);
   }
 
   static create() {

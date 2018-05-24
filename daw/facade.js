@@ -3,11 +3,12 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Dummy } from './';
+import { Song, Dummy } from './';
 
 export class Facade {
-  constructor(owner, definition, options = {}) {
-    this.owner = owner;
+  constructor(definition, options = {}) {
+    //this.swner = swner;
+    this.song = Song.default;
     this.definition = definition;
 
     this.inputs = [];
@@ -15,7 +16,7 @@ export class Facade {
       this.definition.inputs.forEach(() => {
         const dummy = Dummy.create();
         this.inputs.push(dummy);
-        dummy.owners.push(this.owner);
+        //dummy.swners.push(this.swner);
       })
     }
     this.inputs = this.definition.hasMultipleInputs ? [] : new Array(this.definition.inputs.length);
@@ -31,7 +32,7 @@ export class Facade {
       throw 'Cannot add input to a facade that does not have multiple inputs';
     }
     this.inputs.push(object);
-    object.owners.push(this.owner);
+    //object.swners.push(this.swner);
   }
 
   setInput(object, idx) {
@@ -46,7 +47,7 @@ export class Facade {
     if (idx === undefined) {
       if (this.definition.inputs.length == 1) {
         this.inputs[0] = object;
-        object.owners.push(this.owner);
+        //object.swners.push(this.swner);
       }
       else {
         const primaryInput = this.definition.inputs.find(input => input.isPrimary);
@@ -55,7 +56,7 @@ export class Facade {
         }
         const index = this.definition.inputs.indexOf(primaryInput);
         this.inputs[index] = object;
-        object.owners.push(this.owner);
+        //object.swners.push(this.swner);
       }
     }
     else {
@@ -91,7 +92,7 @@ export class Facade {
     return this.inputs[idx];
   }
 
-  get numberOfOnputs() {
+  get numberOfInputs() {
     return this.inputs.length;
   }
 

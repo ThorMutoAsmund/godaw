@@ -6,14 +6,11 @@
 import { Song, Facade, FacadeDefinition, InputDefinition, OutputDefinition } from './';
 
 export class Part {
-  constructor(object, position = 0, options = {}) {
+  constructor(numberOfChannels, position = 0, options = {}) {
     this.uid = Song.getUID();
-    this.owners = [];
+    this.song = Song.default;
 
-    if (!object) {
-      throw 'Cannot create part without an object';
-    }
-
+    // Set up facade
     const facadeDefinition = new FacadeDefinition({
       inputs: [
         new InputDefinition({
@@ -22,14 +19,12 @@ export class Part {
       ],
       outputs: [
         new OutputDefinition({
-          numberOfChannels: object.numberOfChannels
+          numberOfChannels
         })
       ]
     });
-    this.facade = new Facade(this, facadeDefinition);
+    this.facade = new Facade(facadeDefinition);
 
-    this.facade.setInput(object);
-        
     this.position = position;
 
     this.level = options.level || 1.0;
@@ -38,66 +33,25 @@ export class Part {
   }
 
   static create(object, position, options) {
-    const part = new Part(object, options);
+    if (!object) {
+      throw 'Cannot create part without an object';
+    }
+
+    const part = new Part(object.numberOfChannels, position, options);
+    part.facade.setInput(object);
+
     return part;
   }
 
   prepare(start, length) {
-    // this.facade.input.prepare(start, length);
-    // Create buffer
-    // this.objectNumberOfChannels = this.object.getNumberOfChannels();
-    // this.renderStart = start;
-    // this.buffers = [];
-    // for (var c = 0; c < this.objectNumberOfChannels; ++c) {
-    //   this.buffers[c] = new Float32Array(length);
-    //   this.buffers[c].fill(0);
-    // }
-    
-    // // Prepare object
-    // this.object.prepare(start, length);
-  }
+    const empty = this.facade.input.facade.output.numberOfChannels == 1 ? [0.0] : [0.0, 0.0];
+    this.facade.setOutput(t => {
+      return t < this.position ?
+           empty :        
+        this.facade.input.facade.output(t - this.position).map(v => v*this.level + this.offset);
+    });
+  }  
 
   render(start, chunkSize) {
-    // if (start >= (this.position + this.length) || (start + chunkSize) <= this.position) {
-    //   return;
-    // }
-
-    // const s = start - this.position;
-    // if (s < 0) {
-    //   chunkSize += s;
-    //   start -= s;
-    // }
-
-    // const bufferOffset = start - this.position;
-    // this.object.render(this.buffers, bufferOffset, chunkSize);
-
-    // if (this.objectNumberOfChannels == 1 && trackNumberOfChannels == 1) {
-    //   for (var t = 0; t < chunkSize; ++t) {
-    //     this.buffers[0][bufferOffset + t] = this.offset + this.level * this.buffers[0][bufferOffset + t];
-    //     trackBuffers[0][start + t] += this.buffers[0][bufferOffset + t];
-    //   }
-    // }
-    // else if (this.objectNumberOfChannels == 1 && trackNumberOfChannels == 2) {
-    //   for (var t = 0; t < chunkSize; ++t) {
-    //     this.buffers[0][bufferOffset + t] = this.offset + this.level * this.buffers[0][bufferOffset + t];
-    //     trackBuffers[0][start + t] += this.buffers[0][bufferOffset + t];
-    //     trackBuffers[1][start + t] += this.buffers[0][bufferOffset + t];
-    //   }
-    // }
-    // else if (this.objectNumberOfChannels == 2 && trackNumberOfChannels == 1) {
-    //   for (var t = 0; t < chunkSize; ++t) {
-    //     this.buffers[0][bufferOffset + t] = this.offset + this.level * this.buffers[0][bufferOffset + t];
-    //     this.buffers[1][bufferOffset + t] = this.offset + this.level * this.buffers[1][bufferOffset + t];
-    //     trackBuffers[0][start + t] += (this.buffers[0][bufferOffset + t] + this.buffers[1][bufferOffset + t]) / 2.0;
-    //   }
-    // }
-    // else if (this.objectNumberOfChannels == 2 && trackNumberOfChannels == 2) {
-    //   for (var t = 0; t < chunkSize; ++t) {
-    //     this.buffers[0][bufferOffset + t] = this.offset + this.level * this.buffers[0][bufferOffset + t];
-    //     this.buffers[1][bufferOffset + t] = this.offset + this.level * this.buffers[1][bufferOffset + t];
-    //     trackBuffers[0][start + t] += this.buffers[0][bufferOffset + t];
-    //     trackBuffers[1][start + t] += this.buffers[1][bufferOffset + t];
-    //   }
-    // }
   }
 }
