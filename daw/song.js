@@ -3,12 +3,13 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Facade, FacadeDefinition } from './';
+const { UID } = require('./uid');
+const { Facade, FacadeDefinition } = require('./facade');
 
-export class Song {
+class Song {
   constructor(options = {}) {    
-    Song._default = this;
-    this.uid = Song.getUID();
+    Song.setDefault(this);
+    this.uid = UID.getUID();
 
     this.name = options.name || 'untitled';
     this.sampleRate = options.sampleRate || 48000;
@@ -22,14 +23,18 @@ export class Song {
      
     // Set up facade
     const facadeDefinition = new FacadeDefinition({
-      hasMultipleInputs: true
+      inputs: [
+        { 
+          name: 'audio',
+          isPrimary: true 
+        }
+      ]
     });
     this.facade = new Facade(facadeDefinition);
   }
 
-  static create(options) {
-    var result = new Song(options);
-    return result;
+  static setDefault(song) {
+    Song._default = song;
   }
 
   static get default() {
@@ -39,12 +44,10 @@ export class Song {
     return Song._default;
   }
 
-  static getUID() {
-    if (Song.uid === undefined) {
-      Song.uid = 0;
-    }
-    return Song.uid++;
+  secondsToSamples(s) {
+    return this.sampleRate*s;
   }
+
 
   // static getSong(object) {
   //   if (object instanceof Song) {
@@ -57,17 +60,12 @@ export class Song {
   //   throw 'Swner could not be retrieved';
   // }
 
-  addTrack(track) {
-    this.facade.addInput(track);    
+  setInput(object) {
+    this.facade.setInput(object);    
   }
 
   render(start, length) {
-    // Check that there is exactly one main track
-    const numberOfMainTracks = this.facade.inputs.filter(input => input.isMain).length;
-    if (numberOfMainTracks != 1) {
-      throw 'There must be exactly one main track';
-    }
-    var mainTrack = this.facade.inputs.filter(input => input.isMain)[0];
+    var mainTrack = this.facade.input;
     
     const orderedList = [];
     this.getOrderedGeneratorList(this, orderedList);
@@ -106,21 +104,7 @@ export class Song {
       }
     }
 
-    console.log(buffers[0]);
-    if (mainTrack.numberOfChannels != 1) {
-      console.log(buffers[1]);
-    }
-
-    // var t = 0;
-    // const actualChunkSize = this.chunkSize == 0 ? length : this.chunkSize;
-    // while (t < length) {
-    //   orderedList.forEach(input => {
-    //     input.render(t + start, Math.min(this.chunkSize, length - t));
-    //     console.log('Rendering '+input.uid+' '+input.constructor.name)
-    //   })
-
-    //   t += actualChunkSize;
-    // }
+    return buffers;
   }
 
   getOrderedGeneratorList(root, orderedList) {
@@ -138,3 +122,4 @@ export class Song {
   }
 }
 
+module.exports = { Song };

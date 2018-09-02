@@ -3,11 +3,13 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Song, Facade, FacadeDefinition, OutputDefinition } from './';
+const { UID } = require('./uid');
+const { Song } = require('./song');
+const { Facade, FacadeDefinition, OutputDefinition } = require('./facade');
 
-export class Dummy {
+class Dummy {
   constructor() {
-    this.uid = Song.getUID();
+    this.uid = UID.getUID();
     this.song = Song.default;
 
     // Set up facade
@@ -21,14 +23,9 @@ export class Dummy {
     this.facade = new Facade(facadeDefinition);
   }
 
-  static create() {
-    return new Dummy();
-  }
-
   prepare(start, length) {
     this.facade.setOutput(() => 0);
   }
-  
-  render(start, chunkSize) {
-  }
 }
+
+module.exports = { Dummy };

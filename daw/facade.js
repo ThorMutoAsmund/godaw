@@ -3,12 +3,12 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Song, Dummy } from './';
+const { UID } = require('./uid');
+//const { Dummy } = require('./dummy');
 
-export class Facade {
+class Facade {
   constructor(definition, options = {}) {
-    //this.swner = swner;
-    this.song = Song.default;
+    //this.song = Song.default;
     this.definition = definition;
 
     this.inputs = [];
@@ -16,7 +16,6 @@ export class Facade {
       this.definition.inputs.forEach(() => {
         const dummy = Dummy.create();
         this.inputs.push(dummy);
-        //dummy.swners.push(this.swner);
       })
     }
     this.inputs = this.definition.hasMultipleInputs ? [] : new Array(this.definition.inputs.length);
@@ -32,7 +31,6 @@ export class Facade {
       throw 'Cannot add input to a facade that does not have multiple inputs';
     }
     this.inputs.push(object);
-    //object.swners.push(this.swner);
   }
 
   setInput(object, idx) {
@@ -47,7 +45,6 @@ export class Facade {
     if (idx === undefined) {
       if (this.definition.inputs.length == 1) {
         this.inputs[0] = object;
-        //object.swners.push(this.swner);
       }
       else {
         const primaryInput = this.definition.inputs.find(input => input.isPrimary);
@@ -56,7 +53,6 @@ export class Facade {
         }
         const index = this.definition.inputs.indexOf(primaryInput);
         this.inputs[index] = object;
-        //object.swners.push(this.swner);
       }
     }
     else {
@@ -125,7 +121,33 @@ export class Facade {
   }
 }
 
-export class FacadeDefinition {
+class Dummy {
+  constructor() {
+    this.uid = UID.getUID();
+    //this.song = Song.default;
+
+    // Set up facade
+    const facadeDefinition = new FacadeDefinition({
+      outputs: [
+        new OutputDefinition({
+          numberOfChannels: 1
+        })
+      ]
+    });
+    this.facade = new Facade(facadeDefinition);
+  }
+
+  static create() {
+    return new Dummy();
+  }
+
+  prepare(start, length) {
+    this.facade.setOutput(() => 0);
+  }
+}
+
+
+class FacadeDefinition {
   constructor(options = {}) {
     this.hasMultipleInputs = options.hasMultipleInputs || false;
 
@@ -134,14 +156,14 @@ export class FacadeDefinition {
   }
 }
 
-export class InputDefinition {
+class InputDefinition {
   constructor(options = {}) {
     this.name = options.name || '';
     this.isPrimary = options.isPrimary || false;
   }
 }
 
-export class OutputDefinition {
+class OutputDefinition {
   constructor(options = {}) {
     this.numberOfChannels = options.numberOfChannels || 2;  
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
@@ -152,3 +174,4 @@ export class OutputDefinition {
   }
 }
 
+module.exports = { Facade, FacadeDefinition, InputDefinition, OutputDefinition };

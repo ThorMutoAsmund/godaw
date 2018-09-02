@@ -3,11 +3,13 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Song, Facade, FacadeDefinition, InputDefinition, OutputDefinition } from './';
+const { UID } = require ('./uid');
+const { Song } = require ('./song');
+const { Facade, FacadeDefinition, InputDefinition, OutputDefinition } = require ('./facade');
 
-export class Part {
-  constructor(numberOfChannels, position = 0, options = {}) {
-    this.uid = Song.getUID();
+class Part {
+  constructor(position, numberOfChannels, options = {}) {
+    this.uid = UID.getUID();
     this.song = Song.default;
 
     // Set up facade
@@ -32,12 +34,12 @@ export class Part {
     this.length = options.length || 0.0;
   }
 
-  static create(object, position, options) {
+  static create(position, object, options) {
     if (!object) {
       throw 'Cannot create part without an object';
     }
 
-    const part = new Part(object.numberOfChannels, position, options);
+    const part = new Part(position, object.numberOfChannels, options);
     part.facade.setInput(object);
 
     return part;
@@ -51,7 +53,6 @@ export class Part {
         this.facade.input.facade.output(t - this.position).map(v => v*this.level + this.offset);
     });
   }  
-
-  render(start, chunkSize) {
-  }
 }
+
+module.exports = { Part };

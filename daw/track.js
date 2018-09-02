@@ -5,23 +5,19 @@
 
 // cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array
 
-import { Facade, FacadeDefinition, OutputDefinition, Song, Part } from './';
+const { UID } = require('./uid');
+const { Song } = require('./song');
+const { Facade, FacadeDefinition, OutputDefinition } = require('./facade');
+const { Part } = require('./part');
 
-export class Track {
+class Track {
   constructor(options = {}) {
-    this.uid = Song.getUID();
+    this.uid = UID.getUID();
     this.song = Song.default;
 
     this.numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
         throw 'Invalid number of channels';
-    }
-
-    if (options.isMain === undefined) {
-      this.isMain = !this.song.facade.inputs.some(input => input.isMain);
-    }
-    else {
-      this.isMain = options.isMain || false;
     }
 
     // Set up facade
@@ -36,63 +32,18 @@ export class Track {
     this.facade = new Facade(facadeDefinition);
   }
 
-  static create(options) {
-    const track = new Track(options);
-
-    // Auto add track to song
-    track.song.facade.addInput(track);
-
-    return track;
-  }
-
   add(object) {
     this.facade.addInput(object);
 
     return object;
   }
 
-  addPart(object, position, options = {}) {
-    const part = Part.create(object, position, options);
+  addPart(position, object, options = {}) {
+    const part = Part.create(position, object, options);
     this.facade.addInput(part);
 
     return part;
   }
-
-  // add(object, position = 0) {
-  //   if (!Reflection.implements(object, IGenerator.prototype)) {
-  //     throw `Cannot add this object to a track: '${object.constructor.name}'`;
-  //   }
-  //   const part = Part.create(object, {
-  //     position
-  //   });
-  //   object.setTrack(this);
-  //   this.generatorList.push(part)
-  //   return part;
-  // }
-
-  // addEffect(object, position = 0) {
-  //   if (!Reflection.implements(object, IEffect.prototype)) {
-  //     throw `Cannot add this object to a track: '${object.constructor.name}'`;
-  //   }
-  //   const part = Part.create(object, {
-  //     position
-  //   });
-  //   object.setTrack(this);
-  //   this.effectList.push(part)
-  //   return part;
-  // }
-
-  // addCC(object, position = 0) {
-  //   if (!Reflection.implements(object, ICC.prototype)) {
-  //     throw `Cannot add this object to a track: '${object.constructor.name}'`;
-  //   }
-  //   const part = Part.create(object, {
-  //     position
-  //   });
-  //   object.setTrack(this);
-  //   this.ccList.push(part);
-  //   return part;
-  // }
 
   prepare(start, length) {
     if (this.numberOfChannels == 1) {
@@ -136,8 +87,6 @@ export class Track {
     }
   }
 
-  render(start, chunkSize) {
-  }
 
     // const song = Song.getSong(this);
   
@@ -154,3 +103,5 @@ export class Track {
     //   part.prepare(start, length);
     // })
 }
+
+module.exports = { Track };

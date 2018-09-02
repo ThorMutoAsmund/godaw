@@ -3,12 +3,18 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-export * from './song';
-export * from './track';
-export * from './facade';
-export * from './sample';
-export * from './part';
-export * from './dummy';
+module.exports = { 
+  ...require('./daw'),
+  ...require('./song'),
+  ...require('./track'),
+  ...require('./facade'),
+  ...require('./sample'),
+  ...require('./part')};
+
+
+
+
+
 
 // export * from './mixer';
 

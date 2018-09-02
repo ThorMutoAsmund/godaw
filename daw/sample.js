@@ -3,18 +3,21 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-import { Song, Facade, FacadeDefinition, OutputDefinition } from './';
-import { default as load } from 'audio-loader';
+const { UID } = require ('./uid');
+const { Song } = require('./song');
+const { Facade, FacadeDefinition, OutputDefinition } = require('./facade');
+const load = require('audio-loader');
 
-export class Sample {
+class Sample {
   constructor(options = {}) {
-    this.uid = Song.getUID();
+    this.uid = UID.getUID();
     this.song = Song.default;
 
     this.numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
       throw 'Invalid number of channels';
     }
+
     this.length = options.length || 0;
     if (this.length < 0) {
       throw 'Invalid sample length';
@@ -47,22 +50,17 @@ export class Sample {
     }
   }
 
-  static create(options) {
-    const sample = new Sample(options);
-    return sample;
-  }
-
   static fromFile(fileName, options) {
     // load one file
     return load(fileName).then(data => {
-        const sample = new Sample({
-            channels: data.numbeOfChannels,
-            sampleRate: data.sampleRate,
-            length: data.length,
-            buffers: data._channelData
-        })
+      const sample = new Sample({
+        channels: data.numbeOfChannels,
+        sampleRate: data.sampleRate,
+        length: data.length,
+        buffers: data._channelData
+      })
 
-        return sample;
+      return sample;
     })
   }
 
@@ -118,8 +116,6 @@ export class Sample {
       });
     }
   }
-  
-  render(start, chunkSize) {
-    // Nop
-  }
 }
+
+module.exports = { Sample };

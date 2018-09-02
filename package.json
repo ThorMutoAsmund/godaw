@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node --presets=es2015 --plugins=transform-object-rest-spread index.js"
+    "__UNUSED": "babel-node --presets=es2015 --plugins=transform-object-rest-spread index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "audio-loader": "^1.0.3",
+    "audiobuffer-to-wav": "^1.0.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
