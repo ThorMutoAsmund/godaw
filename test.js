@@ -1,24 +1,35 @@
-const a = { name:'thor', job:'programmer'};
 
-class MyClass {
-  constructor(options = {}) {
-    const result = new MyClass();
-    result = {...options,...result};
-    result.started = true;
-return result;
+class myMixin {
+  speak() {
+    console.log("hi " + this.name);
+  }
+  get ucName() {
+    return "this.name.toUpperCase()";
   }
 
-  say(text) {
-    console.log('HI ' + text);
+}
+
+class myClass {
+  constructor() {
+    this.name = "Thor";
   }
 }
 
-const m = new MyClass();
-const n = new MyClass(a);
+function getInstanceMethodNames (obj) {
+  const proto = Object.getPrototypeOf (obj);
+  const names = Object.getOwnPropertyNames (proto);
+  console.log(names);
+  return names.filter (name => {
+    return name !='arguments' && name !='caller' && name !='constructor' && typeof obj[name] === 'function';
+  });
+}
 
-console.log(m,n);
 
-//m.say('thor');
+ console.log(getInstanceMethodNames(new myMixin()));
+ Object.assign(myClass.prototype, {
+   speak: myMixin.prototype.speak,
+   ucName: myMixin.prototype.ucName
+ });
 
-n.say('kenny');
-
+var a = new myClass();
+a.speak();
