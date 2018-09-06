@@ -1,13 +1,19 @@
 //
-// DAW Part
+// DAW Effect
 // (c) Thor Muto Asmund, 2018
 //
+
+
+// TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD 
+// TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD 
+// TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD 
+// TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD 
 
 const { UID } = require ('./uid');
 const { Song } = require ('./song');
 const { Facade, FacadeDefinition, InputDefinition, OutputDefinition } = require ('./facade');
 
-class Part {
+class Effect {
   constructor(position, numberOfChannels, options = {}) {
     this.uid = UID.getUID();
     this.song = Song.default;
@@ -57,4 +63,4 @@ class Part {
   }  
 }
 
-module.exports = { Part };
+module.exports = { Effect };

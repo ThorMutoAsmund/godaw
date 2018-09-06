@@ -4,6 +4,7 @@
 //
 
 const fs = require('fs');
+const G = require('./g');
 const { Song } = require('./song');
 const { Track } = require('./track');
 const { Mixer } = require('./mixer');
@@ -40,35 +41,43 @@ class DAW {
       to: -1,
       ...options};
     
-    const optionInt = {
+    const optionNumber = {
       from: true,
       to: true
     }
     
-    var firstArg = true, key = null;
+    var firstArg = 0, key = null;
+    var modeArgs = [];;
     options.args.forEach(arg => {
-      if (firstArg) {
+      var isOption = arg.startsWith('--');
+
+      if (firstArg == 0 && !isOption) {
         options.mode = arg.toLowerCase();
-        firstArg = false;        
+        firstArg++;
+      }
+      else if (firstArg > 0 && !isOption) {
+        modeArgs[firstArg - 1] = arg;
+        firstArg++;
       }
       else if (key === null) {
-        if (!arg.startsWith('--')) {
+        if (!isOption) {
           throw new TypeError('Argument error: ' +  arg);
         }
         key = arg.substring(2);
+        firstArg = -1;
       }
       else {
-        if (optionInt[key]) {
+        if (optionNumber[key]) {
           var isSeconds = false;
-          if (arg[arg.length-1] == 's') {
+          if (arg[arg.length - 1] == 's') {
             arg = arg.substring(0, arg.length-1);
             isSeconds = true;
           }
-          var intVal = parseInt(arg);
-          if (isNaN(intVal)) {
-            throw new TypeError('Not an integer: ' +  arg);
+          var numericVal = parseFloat(arg);
+          if (isNaN(numericVal)) {
+            throw new TypeError('Not a number: ' +  arg);
           }
-          options[key] = isSeconds ? Song.default.secondsToSamples(intVal) : intVal;  
+          options[key] = isSeconds ? G.sec(numericVal) : numericVal;  
         }
         else {
           options[key] = arg;  
@@ -86,26 +95,32 @@ class DAW {
 
     // TBD: Should be able to calculate correct song length
     if (options.to == -1) {
-      options.to = Song.default.secondsToSamples(10);
+      options.to = G.sec(10);
     }
 
-    const buffers = Song.default.render(options.from, options.to - options.from);
-
-    switch(options.mode) {
-      case 'log':
-        console.log(buffers[0]);
-        if (Song.default.facade.input.numberOfChannels != 1) {
-          console.log(buffers[1]);
-        }
-        break;
-      case 'play':
-        break;
-      case 'save':
-        DAW.save(buffers, './output.wav');
-        break;
-      default:
-        throw new TypeError('Unknown mode: ' + options.mode);
-    }
+    return Song.default.render(options.from, options.to - options.from).then(buffers => {
+      console.log('Buffers rendered ' + buffers[0].length);
+      switch(options.mode) {
+        case 'log':
+          console.log(buffers[0]);
+          if (Song.default.facade.input.numberOfChannels != 1) {
+            console.log(buffers[1]);
+          }
+          break;
+        case 'play':
+          break;
+        case 'save':
+          if (!modeArgs[0]) {
+            modeArgs[0] = './output.wav';
+          }
+          DAW.save(buffers, modeArgs[0]);
+          break;
+        default:
+          throw new TypeError('Unknown mode: ' + options.mode);
+      }
+    }).catch(e => {
+      console.log("DAW ERROR", e)
+    });
   }
 
   static save(buffers, filePath) {
@@ -120,7 +135,6 @@ class DAW {
     }
 
     var arrayBuffer = toWav(audioBuffer);
-    console.log(arrayBuffer);
     fs.writeFileSync(filePath, new Buffer(arrayBuffer));
   }
 }

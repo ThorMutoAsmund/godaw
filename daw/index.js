@@ -4,6 +4,7 @@
 //
 
 module.exports = { 
+  G: require('./g'),
   ...require('./daw'),
   ...require('./song'),
   ...require('./track'),

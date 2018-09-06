@@ -44,11 +44,6 @@ class Song {
     return Song._default;
   }
 
-  secondsToSamples(s) {
-    return this.sampleRate*s;
-  }
-
-
   // static getSong(object) {
   //   if (object instanceof Song) {
   //     return object;
@@ -65,46 +60,51 @@ class Song {
   }
 
   render(start, length) {
-    var mainTrack = this.facade.input;
+    var mainInput = this.facade.input;
     
     const orderedList = [];
     this.getOrderedGeneratorList(this, orderedList);
+    const buffers = new Array(mainInput.numberOfChannels);
+    return new Promise(resolve => {
+      Promise.all(orderedList.map(input => input.prepare(start, length)
+      )).then(() => {
+        console.log('Preparation finished');
+        
+        if (mainInput.numberOfChannels == 1) {
+          buffers[0] = new Float32Array(length);
+          buffers[0].fill(0.0);
+        }
+        else {
+          buffers[0] = new Float32Array(length);
+          buffers[0].fill(0.0);
+          buffers[1] = new Float32Array(length);
+          buffers[1].fill(0.0);
+        }
+    
+        var t = 0;
+        if (mainInput.numberOfChannels == 1) {
+          while (t < length) {
+            const v = mainInput.facade.output(t + start);
+            buffers[0][t] = v[0];
+            t += 1;
+          }
+        }
+        else {
+          while (t < length) {
+            const v = mainInput.facade.output(t + start);
+            buffers[0][t] = v[0];
+            buffers[1][t] = v[1];
+            t += 1;
+          }
+        }
+    
+        resolve(buffers);
+      }).catch(e => {
+        console.log("RENDER ERROR", e)
+      });
 
-    // this.facade.inputs
-    orderedList.forEach(input => {
-      input.prepare(start, length);
-    })
 
-    const buffers = new Array(mainTrack.numberOfChannels);
-    if (mainTrack.numberOfChannels == 1) {
-      buffers[0] = new Float32Array(length);
-      buffers[0].fill(0.0);
-    }
-    else {
-      buffers[0] = new Float32Array(length);
-      buffers[0].fill(0.0);
-      buffers[1] = new Float32Array(length);
-      buffers[1].fill(0.0);
-    }
-
-    var t = 0;
-    if (mainTrack.numberOfChannels == 1) {
-      while (t < length) {
-        const v = mainTrack.facade.output(t + start);
-        buffers[0][t] = v[0];
-        t += 1;
-      }
-    }
-    else {
-      while (t < length) {
-        const v = mainTrack.facade.output(t + start);
-        buffers[0][t] = v[0];
-        buffers[1][t] = v[1];
-        t += 1;
-      }
-    }
-
-    return buffers;
+    });
   }
 
   getOrderedGeneratorList(root, orderedList) {

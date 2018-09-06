@@ -24,7 +24,9 @@ class Dummy {
   }
 
   prepare(start, length) {
-    this.facade.setOutput(() => 0);
+    return new Promise(resolve => {
+      this.facade.setOutput(() => 0);
+    });
   }
 }
 
