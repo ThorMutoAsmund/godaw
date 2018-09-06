@@ -22,7 +22,7 @@ class Song {
     }
      
     // Set up facade
-    const facadeDefinition = new FacadeDefinition({
+    this.defineFacade({
       inputs: [
         { 
           name: 'audio',
@@ -30,7 +30,6 @@ class Song {
         }
       ]
     });
-    this.facade = new Facade(facadeDefinition);
   }
 
   static setDefault(song) {
@@ -55,12 +54,8 @@ class Song {
   //   throw 'Swner could not be retrieved';
   // }
 
-  setInput(object) {
-    this.facade.setInput(object);    
-  }
-
   render(start, length) {
-    var mainInput = this.facade.input;
+    var mainInput = this.getInput();
     
     const orderedList = [];
     this.getOrderedGeneratorList(this, orderedList);
@@ -84,14 +79,14 @@ class Song {
         var t = 0;
         if (mainInput.numberOfChannels == 1) {
           while (t < length) {
-            const v = mainInput.facade.output(t + start);
+            const v = mainInput.getOutput()(t + start);
             buffers[0][t] = v[0];
             t += 1;
           }
         }
         else {
           while (t < length) {
-            const v = mainInput.facade.output(t + start);
+            const v = mainInput.getOutput()(t + start);
             buffers[0][t] = v[0];
             buffers[1][t] = v[1];
             t += 1;
@@ -108,8 +103,8 @@ class Song {
   }
 
   getOrderedGeneratorList(root, orderedList) {
-    root.facade.inputs.forEach(input => {
-      if (input.facade.inputs.length == 0) {
+    root.inputs.forEach(input => {
+      if (input.inputs.length == 0) {
         if (!orderedList.some(item => item.uid === input.uid)) {
           orderedList.push(input);
         }
@@ -121,5 +116,8 @@ class Song {
     })
   }
 }
+
+// Mixin
+Facade.assignTo(Song);
 
 module.exports = { Song };

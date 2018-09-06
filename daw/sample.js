@@ -35,14 +35,13 @@ class Sample {
     }
  
     // Set up facade
-    const facadeDefinition = new FacadeDefinition({
+    this.defineFacade({
         outputs: [
           new OutputDefinition({
             numberOfChannels: this.numberOfChannels
           })
         ]
       });
-    this.facade = new Facade(facadeDefinition);
   
     if (!this.file) {
       if (options.buffers) {
@@ -94,7 +93,7 @@ class Sample {
         const empty = this.numberOfChannels == 1 ? [0.0] : [0.0, 0.0];
         
         if (this.numberOfChannels == 1) {
-          this.facade.setOutput(t => {
+          this.setOutput(t => {
             var index = t*rateMultiplier;
             var ia = index | 0;
             if (ia < 0 || ia >= this.length-1) {
@@ -116,7 +115,7 @@ class Sample {
           });
         }
         else {
-          this.facade.setOutput(t => {
+          this.setOutput(t => {
             var index = rateMultiplier*t;
             var ia = index | 0;
             if (ia < 0 || ia >= this.length-1) {
@@ -144,5 +143,8 @@ class Sample {
     });
   }
 }
+
+// Mixin
+Facade.assignTo(Sample);
 
 module.exports = { Sample };

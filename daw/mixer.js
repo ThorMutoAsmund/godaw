@@ -18,7 +18,7 @@ class Mixer {
     }
 
     // Set up facade
-    const facadeDefinition = new FacadeDefinition({
+    this.defineFacade({
       hasMultipleInputs: true,
       outputs: [
         new OutputDefinition({
@@ -26,30 +26,23 @@ class Mixer {
         })
       ]
     });
-    this.facade = new Facade(facadeDefinition);
 
     // Define tracks
     if (options.tracks) {
       options.tracks.forEach(track => {
-        this.add(track);
+        this.addInput(track);
       });
     }
-  }
-
-  add(object) {
-    this.facade.addInput(object);
-
-    return object;
   }
 
   prepare(start, length) {
     return new Promise(resolve => {
       if (this.numberOfChannels == 1) {
-        this.facade.setOutput(t => {
-          var v = this.facade.inputs.reduce(input => {
+        this.setOutput(t => {
+          var v = this.inputs.reduce(input => {
             (result, input) => 
               result + 
-              input.facade.output(t).reduce(
+              input.getOutput()(t).reduce(
                 (accumulator, currentValue) => accumulator + currentValue,
                 0.0
               )
@@ -60,12 +53,12 @@ class Mixer {
         });
       }
       else {
-        this.facade.setOutput(t => {
-          var v = this.facade.inputs.reduce(
+        this.setOutput(t => {
+          var v = this.inputs.reduce(
             (result, input) => 
               {
                 var w = [0.0, 0.0];
-                const o = input.facade.output(t);
+                const o = input.getOutput()(t);
                 if (o.length == 1) {
                   w[0] += o[0];
                   w[1] += o[0];
@@ -88,5 +81,8 @@ class Mixer {
     });
   }
 }
+
+// Mixin
+Facade.assignTo(Mixer);
 
 module.exports = { Mixer };

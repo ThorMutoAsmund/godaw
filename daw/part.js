@@ -13,7 +13,7 @@ class Part {
     this.song = Song.default;
 
     // Set up facade
-    const facadeDefinition = new FacadeDefinition({
+    this.defineFacade({
       inputs: [
         new InputDefinition({
           name: 'Main'
@@ -25,7 +25,7 @@ class Part {
         })
       ]
     });
-    this.facade = new Facade(facadeDefinition);
+
     this.position = position;
     this.numberOfChannels = numberOfChannels;
 
@@ -39,7 +39,7 @@ class Part {
     }
 
     const part = new Part(position, object.numberOfChannels, options);
-    part.facade.setInput(object);
+    part.setInput(object);
     
     return part;
   }
@@ -47,14 +47,18 @@ class Part {
   prepare(start, length) {
     return new Promise(resolve => {
       const empty = this.numberOfChannels == 1 ? [0.0] : [0.0, 0.0]
-      this.facade.setOutput(t => {
+      this.setOutput(t => {
         return t < this.position || (this.length > 0 && t >= this.position + this.length) ?
           empty :
-          this.facade.input.facade.output(t - this.position).map(v => v*this.level);
+          this.getInput().getOutput()(t - this.position).map(v => v*this.level);
       });
       resolve();
     });
   }  
 }
+
+// Mixin
+Facade.assignTo(Part);
+
 
 module.exports = { Part };

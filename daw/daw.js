@@ -103,7 +103,7 @@ class DAW {
       switch(options.mode) {
         case 'log':
           console.log(buffers[0]);
-          if (Song.default.facade.input.numberOfChannels != 1) {
+          if (Song.default.getInput().numberOfChannels != 1) {
             console.log(buffers[1]);
           }
           break;
@@ -127,10 +127,10 @@ class DAW {
     var audioBuffer = new AudioBuffer({
       length: buffers[0].length,
       sampleRate: Song.default.sampleRate,
-      numberOfChannels: Song.default.facade.input.numberOfChannels
+      numberOfChannels: Song.default.getInput().numberOfChannels
     });
     audioBuffer.copyToChannel(buffers[0], 0);
-    if (Song.default.facade.input.numberOfChannels == 2) {
+    if (Song.default.getInput().numberOfChannels == 2) {
       audioBuffer.copyToChannel(buffers[1], 1);
     }
 

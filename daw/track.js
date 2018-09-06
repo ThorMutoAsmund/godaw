@@ -21,7 +21,7 @@ class Track {
     }
 
     // Set up facade
-    const facadeDefinition = new FacadeDefinition({
+    this.defineFacade({
       hasMultipleInputs: true,
       outputs: [
         new OutputDefinition({
@@ -29,18 +29,11 @@ class Track {
         })
       ]
     });
-    this.facade = new Facade(facadeDefinition);
-  }
-
-  add(object) {
-    this.facade.addInput(object);
-
-    return object;
   }
 
   addPart(position, object, options = {}) {
     const part = Part.create(position, object, options);
-    this.facade.addInput(part);
+    this.addInput(part);
 
     return part;
   }
@@ -48,11 +41,11 @@ class Track {
   prepare(start, length) {
     return new Promise(resolve => {
       if (this.numberOfChannels == 1) {
-        this.facade.setOutput(t => {
-          var v = this.facade.inputs.reduce(input => {
+        this.setOutput(t => {
+          var v = this.inputs.reduce(input => {
             (result, input) => 
               result + 
-              input.facade.output(t).reduce(
+              input.getOutput()(t).reduce(
                 (accumulator, currentValue) => accumulator + currentValue,
                 0.0
               )
@@ -63,11 +56,11 @@ class Track {
         });
       }
       else {
-        this.facade.setOutput(t => {
-          var v = this.facade.inputs.reduce(
+        this.setOutput(t => {
+          var v = this.inputs.reduce(
             (result, input) => 
               {
-                const o = input.facade.output(t);
+                const o = input.getOutput()(t);
                 if (o.length == 1) {
                   return [result[0] + o[0], result[1] + o[0]];
                 }
@@ -85,22 +78,9 @@ class Track {
       resolve();
     });
   }
-
-
-    // const song = Song.getSong(this);
-  
-    // this.facade.inputs.forEach(input => {
-    //   input.prepare(start, length);
-    // })
-    
-    // this.buffers = [];
-    // for (var c = 0; c < this.numberOfChannels; ++c) {
-    //   this.buffers[c] = new Float32Array(length);
-    //   this.buffers[c].fill(0);
-    // }
-    // this.generatorList.forEach(part => {
-    //   part.prepare(start, length);
-    // })
 }
+
+// Mixin
+Facade.assignTo(Track);
 
 module.exports = { Track };
