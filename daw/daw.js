@@ -42,7 +42,7 @@ class DAW {
   static Go(options = {}) {
     options = {
       args: process.argv.slice(2), 
-      mode: 'null',
+      mode: undefined,
       from: 0,
       to: -1,
       ...options};
@@ -92,6 +92,25 @@ class DAW {
       }
     });
 
+    if (!options.mode) {
+      throw new TypeError('Mode not speified');
+    }
+
+    var modeFunc;
+    switch(options.mode) {
+      case 'log':
+        modeFunc = DAW.log;
+        break;
+      case 'play':
+        modeFunc = DAW.play;
+        break;
+      case 'save':
+        modeFunc = DAW.save;
+        break;
+      default:
+        throw new TypeError('Unknown mode: ' + options.mode);
+    }
+
     if (options.to < -1 || options.from < 0) {
       throw new TypeError('"to" and "from" must be positive integers');
     }
@@ -102,41 +121,37 @@ class DAW {
     // TBD: Should be able to calculate correct song length
     if (options.to == -1) {
       options.to = G.sec(10);
-    }
+    }    
 
     return Song.default.render(options.from, options.to - options.from).then(buffers => {
       console.log('Buffers rendered ' + buffers[0].length);
-      switch(options.mode) {
-        case 'log':
-          console.log(buffers[0]);
-          if (Song.default.getInput().numberOfChannels != 1) {
-            console.log(buffers[1]);
-          }
-          break;
-        case 'play':
-          break;
-        case 'save':
-          if (!modeArgs[0]) {
-            modeArgs[0] = './output.wav';
-          }
-          DAW.save(buffers, modeArgs[0]);
-          break;
-        default:
-          throw new TypeError('Unknown mode: ' + options.mode);
-      }
+      modeFunc(buffers, modeArgs);
     }).catch(e => {
       console.log("DAW ERROR", e)
     });
   }
 
-  static save(buffers, filePath) {
+  static log(buffers) {
+    console.log(buffers[0]);
+    if (Song.default.input.numberOfChannels != 1) {
+      console.log(buffers[1]);
+    }
+  }
+
+  static play() {
+
+  }
+
+  static save(buffers, args) {
+    var filePath = !args[0] ? './output.wav' : args[0];
+
     var audioBuffer = new AudioBuffer({
       length: buffers[0].length,
       sampleRate: Song.default.sampleRate,
-      numberOfChannels: Song.default.getInput().numberOfChannels
+      numberOfChannels: Song.default.input.numberOfChannels
     });
     audioBuffer.copyToChannel(buffers[0], 0);
-    if (Song.default.getInput().numberOfChannels == 2) {
+    if (Song.default.input.numberOfChannels == 2) {
       audioBuffer.copyToChannel(buffers[1], 1);
     }
 

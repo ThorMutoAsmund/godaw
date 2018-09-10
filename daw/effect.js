@@ -47,7 +47,7 @@ class Effect extends Facade(Object) {
   }
 
   get length() {
-    return this.getInput().length;
+    return this.input.length;
   }
 
   get numberOfChannels() {
@@ -58,7 +58,7 @@ class Effect extends Facade(Object) {
     return new Promise(resolve => {
       const empty = this.numberOfChannels == 1 ? [0.0] : [0.0, 0.0]
       this.setOutput(t => {
-        return this.process(t, this.getInput(), this.options);
+        return this.process(t, this.input, this.options);
       });
       resolve();
     });

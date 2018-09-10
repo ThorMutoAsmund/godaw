@@ -56,7 +56,7 @@ class Part extends Facade(Object) {
       this.setOutput(t => {
         return t < this.position || (this.length > 0 && t >= this.position + this.length) ?
           empty :
-          this.getInput().getOutput()(t - this.position).map(v => v*this.level);
+          this.input.output(t - this.position).map(v => v*this.level);
       });
       resolve();
     });

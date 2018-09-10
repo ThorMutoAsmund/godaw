@@ -46,11 +46,11 @@ class Song extends Facade(Object) {
   }
 
   get numberOfChannels() {
-    return this.getInput().numberOfChannels;
+    return this.input.numberOfChannels;
   }
 
   render(start, length) {
-    var mainInput = this.getInput();
+    var mainInput = this.input;
     
     const orderedList = [];
     this.getOrderedGeneratorList(this, orderedList);
@@ -74,14 +74,14 @@ class Song extends Facade(Object) {
         var t = 0;
         if (this.numberOfChannels == 1) {
           while (t < length) {
-            const v = mainInput.getOutput()(t + start);
+            const v = mainInput.output(t + start);
             buffers[0][t] = v[0];
             t += 1;
           }
         }
         else {
           while (t < length) {
-            const v = mainInput.getOutput()(t + start);
+            const v = mainInput.output(t + start);
             buffers[0][t] = v[0];
             buffers[1][t] = v[1];
             t += 1;
