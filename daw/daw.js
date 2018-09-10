@@ -9,6 +9,7 @@ const { Song } = require('./song');
 const { Track } = require('./track');
 const { Mixer } = require('./mixer');
 const { Sample } = require('./sample');
+const { Effect } = require('./effect');
 const AudioBuffer = require('audio-buffer');
 var toWav = require('audiobuffer-to-wav')
 
@@ -31,6 +32,11 @@ class DAW {
   static Sample(options = {}) {
     const sample = new Sample(options);
     return sample;
+  }
+
+  static Effect(process, object, options = {}) {
+    const effect = Effect.create(process, object, options);
+    return effect;
   }
 
   static Go(options = {}) {

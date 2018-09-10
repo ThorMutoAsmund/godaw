@@ -3,13 +3,15 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-const { UID } = require ('./uid');
+const { getUID } = require('./helpers/uid');
 const { Song } = require ('./song');
-const { Facade, FacadeDefinition, InputDefinition, OutputDefinition } = require ('./facade');
+const { Facade, FacadeDefinition, InputDefinition, OutputDefinition } = require ('./helpers/facade');
 
-class Part {
+class Part extends Facade(Object) {
   constructor(position, numberOfChannels, options = {}) {
-    this.uid = UID.getUID();
+    super();
+
+    this.uid = getUID();
     this.song = Song.default;
 
     // Set up facade
@@ -27,10 +29,14 @@ class Part {
     });
 
     this.position = position;
-    this.numberOfChannels = numberOfChannels;
+    this._numberOfChannels = numberOfChannels;
 
     this.level = options.level || 1.0;
     this.length = options.length || 0.0;
+  }
+
+  get numberOfChannels() {
+    return this._numberOfChannels;
   }
 
   static create(position, object, options) {
@@ -56,9 +62,5 @@ class Part {
     });
   }  
 }
-
-// Mixin
-Facade.assignTo(Part);
-
 
 module.exports = { Part };

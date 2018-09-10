@@ -3,21 +3,23 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-const { UID } = require ('./uid');
+const { getUID } = require('./helpers/uid');
 const { Song } = require('./song');
-const { Facade, FacadeDefinition, OutputDefinition } = require('./facade');
+const { Facade, FacadeDefinition, OutputDefinition } = require('./helpers/facade');
 const load = require('audio-loader');
 
-class Sample {
+class Sample extends Facade(Object) {
   constructor(options = {}) {
-    this.uid = UID.getUID();
+    super();
+
+    this.uid = getUID();
     this.song = Song.default;
 
     if (options.file) {
       this.file = options.file;
     }
 
-    this.numberOfChannels = options.numberOfChannels || 2;
+    this._numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
       throw 'Invalid number of channels';
     }
@@ -65,6 +67,18 @@ class Sample {
 
   get duration() {
     return this.length / this.sampleRate;
+  }
+
+  set length(v) {
+    this._length = v;
+  }
+
+  get length() {
+    return this._length;
+  }
+
+  get numberOfChannels() {
+    return this._numberOfChannels;
   }
 
   set(channel, index, value) {
@@ -143,8 +157,5 @@ class Sample {
     });
   }
 }
-
-// Mixin
-Facade.assignTo(Sample);
 
 module.exports = { Sample };

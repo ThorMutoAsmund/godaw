@@ -5,17 +5,20 @@
 
 // cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array
 
-const { UID } = require('./uid');
+const { getUID } = require('./helpers/uid');
 const { Song } = require('./song');
-const { Facade, FacadeDefinition, OutputDefinition } = require('./facade');
+const { Facade, FacadeDefinition, OutputDefinition } = require('./helpers/facade');
+const { Mix } = require('./helpers/mix');
 const { Part } = require('./part');
 
-class Track {
+class Track extends Facade(Mix(Object)) {
   constructor(options = {}) {
-    this.uid = UID.getUID();
+    super();
+
+    this.uid = getUID();
     this.song = Song.default;
 
-    this.numberOfChannels = options.numberOfChannels || 2;
+    this._numberOfChannels = options.numberOfChannels || 2;
     if (this.numberOfChannels < 1 || this.numberOfChannels > 2) {
         throw 'Invalid number of channels';
     }
@@ -31,6 +34,10 @@ class Track {
     });
   }
 
+  get numberOfChannels() {
+    return this._numberOfChannels;
+  }
+  
   addPart(position, object, options = {}) {
     const part = Part.create(position, object, options);
     this.addInput(part);
@@ -39,48 +46,8 @@ class Track {
   }
 
   prepare(start, length) {
-    return new Promise(resolve => {
-      if (this.numberOfChannels == 1) {
-        this.setOutput(t => {
-          var v = this.inputs.reduce(input => {
-            (result, input) => 
-              result + 
-              input.getOutput()(t).reduce(
-                (accumulator, currentValue) => accumulator + currentValue,
-                0.0
-              )
-            ,
-            0.0
-          });
-          return [v];
-        });
-      }
-      else {
-        this.setOutput(t => {
-          var v = this.inputs.reduce(
-            (result, input) => 
-              {
-                const o = input.getOutput()(t);
-                if (o.length == 1) {
-                  return [result[0] + o[0], result[1] + o[0]];
-                }
-                else {
-                  return [result[0] + o[0], result[1] + o[1]];
-                }              
-              }           
-            ,
-            [0.0, 0.0]
-          );
-          return v;
-        });
-      }
-
-      resolve();
-    });
+    return this.mix(start, length)
   }
 }
-
-// Mixin
-Facade.assignTo(Track);
 
 module.exports = { Track };

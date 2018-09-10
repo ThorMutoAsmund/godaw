@@ -3,13 +3,15 @@
 // (c) Thor Muto Asmund, 2018
 //
 
-const { UID } = require('./uid');
-const { Facade, FacadeDefinition } = require('./facade');
+const { getUID } = require('./helpers/uid');
+const { Facade, FacadeDefinition } = require('./helpers/facade');
 
-class Song {
-  constructor(options = {}) {    
+class Song extends Facade(Object) {
+  constructor(options = {}) {
+    super();
+
     Song.setDefault(this);
-    this.uid = UID.getUID();
+    this.uid = getUID();
 
     this.name = options.name || 'untitled';
     this.sampleRate = options.sampleRate || 48000;
@@ -43,29 +45,22 @@ class Song {
     return Song._default;
   }
 
-  // static getSong(object) {
-  //   if (object instanceof Song) {
-  //     return object;
-  //   }
-  //   if (object.swners.length > 0) {
-  //     return Song.getSong(object.swners[0]);
-  //   }
-
-  //   throw 'Swner could not be retrieved';
-  // }
+  get numberOfChannels() {
+    return this.getInput().numberOfChannels;
+  }
 
   render(start, length) {
     var mainInput = this.getInput();
     
     const orderedList = [];
     this.getOrderedGeneratorList(this, orderedList);
-    const buffers = new Array(mainInput.numberOfChannels);
+    const buffers = new Array(this.numberOfChannels);
     return new Promise(resolve => {
       Promise.all(orderedList.map(input => input.prepare(start, length)
       )).then(() => {
         console.log('Preparation finished');
         
-        if (mainInput.numberOfChannels == 1) {
+        if (this.numberOfChannels == 1) {
           buffers[0] = new Float32Array(length);
           buffers[0].fill(0.0);
         }
@@ -77,7 +72,7 @@ class Song {
         }
     
         var t = 0;
-        if (mainInput.numberOfChannels == 1) {
+        if (this.numberOfChannels == 1) {
           while (t < length) {
             const v = mainInput.getOutput()(t + start);
             buffers[0][t] = v[0];
@@ -116,8 +111,5 @@ class Song {
     })
   }
 }
-
-// Mixin
-Facade.assignTo(Song);
 
 module.exports = { Song };

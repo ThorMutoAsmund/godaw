@@ -8,9 +8,10 @@ module.exports = {
   ...require('./daw'),
   ...require('./song'),
   ...require('./track'),
-  ...require('./facade'),
   ...require('./sample'),
-  ...require('./part')};
+  ...require('./part'),
+  ...require('./effect')
+};
 
 
 
