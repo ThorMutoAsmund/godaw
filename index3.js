@@ -11,11 +11,11 @@ var t2 = DAW.Track();
 var m = DAW.Mixer({ tracks: [t1, t2]});
 
 function nop(t, input) {
-  return input.getOutput()(t);
+  return input.output(t);
 }
 
 function tremolo(t, input, options) {
-  return input.getOutput()(t).map(s => s * Math.sin(t *2 * Math.PI / options.speed));
+  return input.output(t).map(s => s * Math.sin(t *2 * Math.PI / options.speed));
 }
 
 function reverse(t, input, options) {
@@ -23,7 +23,7 @@ function reverse(t, input, options) {
     return input.numberOfChannels == 2 ? [0.0, 0.0] : [0.0];
   }
 
-  return input.getOutput()(input.length - t - 1);  
+  return input.output(input.length - t - 1);  
 }
 
 var sample = DAW.Sample({file: './samples/speak.wav', numberOfChannels: 2});

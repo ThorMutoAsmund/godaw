@@ -1,26 +1,26 @@
-
-var handler = {
-  get (target, key) {
-    console.info(`Get on property "${key}"`)
-    return target[key]*2;
-  },
-  speak () {
-    console.log('Hey mate');
+let mixin = (superClass) => class extends superClass {
+  getName() {
+    return 'Thor';
+  }
+  get name() {
+    return 'Bent';
   }
 }
 
-var myClass = {
-  talk () {
-    console.log('Goobledigoob');
+class person
+{
+  getJob() {
+    return 'developer';
   }
-
 }
 
+class me extends mixin(person)
+{
+  getAge() {
+    return '45';
+  }  
+}
 
-var p = new Proxy(myClass, handler);
+var p = new me();
 
-var s1 = new Symbol(2);
-
-p.a = 20;
-console.log(p.a);
-p.speak();
+console.log(p.getAge(), p.getJob(), p.getName(), p.name);
