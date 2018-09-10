@@ -1,35 +1,26 @@
 
-class myMixin {
-  speak() {
-    console.log("hi " + this.name);
+var handler = {
+  get (target, key) {
+    console.info(`Get on property "${key}"`)
+    return target[key]*2;
+  },
+  speak () {
+    console.log('Hey mate');
   }
-  get ucName() {
-    return "this.name.toUpperCase()";
+}
+
+var myClass = {
+  talk () {
+    console.log('Goobledigoob');
   }
 
 }
 
-class myClass {
-  constructor() {
-    this.name = "Thor";
-  }
-}
 
-function getInstanceMethodNames (obj) {
-  const proto = Object.getPrototypeOf (obj);
-  const names = Object.getOwnPropertyNames (proto);
-  console.log(names);
-  return names.filter (name => {
-    return name !='arguments' && name !='caller' && name !='constructor' && typeof obj[name] === 'function';
-  });
-}
+var p = new Proxy(myClass, handler);
 
+var s1 = new Symbol(2);
 
- console.log(getInstanceMethodNames(new myMixin()));
- Object.assign(myClass.prototype, {
-   speak: myMixin.prototype.speak,
-   ucName: myMixin.prototype.ucName
- });
-
-var a = new myClass();
-a.speak();
+p.a = 20;
+console.log(p.a);
+p.speak();
