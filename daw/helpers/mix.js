@@ -13,7 +13,7 @@ let Mix = (superClass) => class extends superClass {
           var v = this.inputs.reduce(input => {
             (result, input) => 
               result + 
-              input.getOutput()(t).reduce(
+              input.output(t).reduce(
                 (accumulator, currentValue) => accumulator + currentValue,
                 0.0
               )
@@ -28,7 +28,7 @@ let Mix = (superClass) => class extends superClass {
           var v = this.inputs.reduce(
             (result, input) => 
               {
-                const o = input.getOutput()(t);
+                const o = input.output(t);
                 if (o.length == 1) {
                   return [result[0] + o[0], result[1] + o[0]];
                 }

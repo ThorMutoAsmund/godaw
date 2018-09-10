@@ -64,6 +64,10 @@ let Facade = (superClass) => class extends superClass {
     }
   }
 
+  get input() {
+    return this.getInput();
+  }
+
   getInput(idx) {
     if (idx === undefined) {
       if (this.facadeDefinition.hasMultipleInputs) {
@@ -103,7 +107,7 @@ let Facade = (superClass) => class extends superClass {
     }    
   }
 
-  getOutput() {
+  get output() {
     if (this.facadeDefinition.outputs.length == 1) {
       return this.outputs[0];
     }
